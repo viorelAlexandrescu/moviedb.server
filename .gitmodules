@@ -1,0 +1,3 @@
+[submodule "moviedb.webapp"]
+	path = moviedb.webapp
+	url = https://github.com/viorelAlexandrescu/moviedb.webapp
