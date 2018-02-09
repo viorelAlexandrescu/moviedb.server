@@ -1,7 +1,3 @@
-import {
-    setImmediate
-} from "timers";
-
 class AuthController {
     static authenticate(credentials, callback) {
         setImmediate(() => {
@@ -14,5 +10,3 @@ class AuthController {
         });
     }
 }
-
-export default AuthController;
