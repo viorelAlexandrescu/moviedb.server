@@ -5,7 +5,8 @@ const userSchema = mongoose.Schema({
     surname: string,
     email: string,
     password: string,
-    accessToken: string
+    accessToken: string,
+    isAdmin: boolean
 });
 
 export const User = mongoose.model('User', userSchema);
