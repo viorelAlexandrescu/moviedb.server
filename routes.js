@@ -3,6 +3,9 @@ const RegisterController = require('./controllers/register');
 const AuthController = require('./controllers/authentifcation');
 const config = require('./config');
 const Movie = require('./models/Movie');
+const User = require('./models/User');
+const Role = require('./models/Role');
+const Review = require('./models/Review');
 const apiRoutes = express.Router(); 
 
 // route to show a message (GET http://localhost:8080/api/)
@@ -21,31 +24,109 @@ apiRoutes.get('/movies', (req, res) => {
 
 apiRoutes.get('/movies/:id', (req, res) => {
     const movieId = req.params.id;
-    Movie.findById(movieId, (err, movies) => {
+    Movie.findById(movieId, (err, movie) => {
         if (err) return console.error(err);
         res.json({
-            movie: movies[0]
+            movie: movie
         });
       });
 });
 
 apiRoutes.post('/movies', (req, res) => {
-    const newMovie = req.body.movie;
-    Movie.save((err, movie) => {
+    const movie = new Movie(req.body.movie)
+    movie.save((err, movie) => {
         if(err) return console.error(err);
-        console.log(movie, 'has been added');
-    })
+        console.log(movie,' has been added');
+    });
 });
 
 apiRoutes.delete('/movies/:id', (req, res) => {
     const movieId = req.params.id;
     Movie.remove({_id: movieId}, (err, movie) => {
-        if (err) return console.error(err);
+        if (err) return console.error(err);        
         Movie.findById(movieId, (err, movie) => {
             if(movie == null)
                 console.log('movie has been removed');
           })
       });
+});
+
+apiRoutes.post('/users', (req, res) => {
+    const user = new User(req.body.user);
+    user.save((err, user) => {
+        if(err) return console.error(err);
+    });
+});
+
+apiRoutes.get('/users/:id', (req, res) => {
+    const userId = req.params.id;
+    User.findById(userId, (err, user) => {
+        if(err) return console.error(err);
+        res.json({
+            user: user
+        });
+    })
+});
+
+apiRoutes.post('/login', (req, res) => {
+    const user = new User(req.body.user);
+    console.log('login for', user);
+    User.findOne(user, 'username', (err, user) => {
+        if(err) return console.error(err);
+        if(user == {}){
+            console.log(user, 'not found')
+           return res.send({
+                success: false
+            });
+        }
+        console.log(user, 'found')
+        return res.send({
+            success: true
+        });
+    })
+});
+
+apiRoutes.get('/roles', (req, res) => {
+    Role.find((err, roles) => {
+        if (err) return console.error(err);
+        res.json({
+            roles: roles
+        });
+        res.end();
+    });
+});
+
+apiRoutes.get('/reviews/:id', (req, res) => {
+    const movieId = req.params.id;
+    Review.find({ movieId: movieId }, (err, reviews) => {
+        if(err) return console.error(err);
+        res.json({
+            reviews: reviews
+        });
+    });
+});
+
+apiRoutes.post('/reviews', (req, res) => {
+    const review = new Review(req.body.review);
+    review.save((err, review) => {
+        if(err) return console.error(err);
+        console.log(review, 'saved in db');
+    })
+})
+
+apiRoutes.get('/rating/:id', (req, res) => {
+    const movieId = req.params.id;
+    Review.find({ movieId: movieId }, (err, reviews) => {
+        if(err) return console.error(err);
+        let rating = 0;
+        for(let review of reviews) {
+            rating += review.rating;
+        }
+        rating = rating/reviews.length;
+        res.json({
+            rating: rating
+        });
+    });
 });
 
 // authenticate
