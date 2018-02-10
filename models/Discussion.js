@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const discussionSchema = mongoose.Schema({
-    subject: string,
+    subject: String,
     comments: []
 });
 const Discussion = mongoose.model('Discussion', discussionSchema);
