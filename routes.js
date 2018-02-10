@@ -6,9 +6,8 @@ const Movie = require('./models/Movie');
 const User = require('./models/User');
 const Role = require('./models/Role');
 const Review = require('./models/Review');
+const Discussion = require('./models/Discussion');
 const apiRoutes = express.Router(); 
-
-const users = [];
 
 // route to show a message (GET http://localhost:8080/api/)
 apiRoutes.get('/', function(req, res) {
@@ -80,28 +79,13 @@ apiRoutes.post('/login', (req, res) => {
                 success: false
             });
         } else {
-            users.forEach(element => {
-                if(element._id !== user._id){
-                    users.push(user);
-                }
-            });
             return res.send({
                 success: true,
                 user: user
             });
         }
-        console.log(users.length);
     })
 });
-
-apiRoutes.post('/logout', (req, res) => {
-    const id = req.body.id;
-    users.forEach((element, index) => {
-        if(element._id === id)
-            users = users.splice(index, 1);
-    });
-    console.log(users.length);
-})
 
 apiRoutes.get('/roles', (req, res) => {
     Role.find((err, roles) => {
@@ -145,6 +129,53 @@ apiRoutes.get('/rating/:id', (req, res) => {
         });
     });
 });
+
+apiRoutes.get('/discussions', (req, res) => {
+    Discussion.find((err, discussions) => {
+        if (err) return console.error(err);
+        res.json({
+            discussions: discussions
+        });
+        res.end();
+    });
+});
+
+apiRoutes.post('/discussions', (req, res) => {
+    const discussion = new Discussion(req.body.discussion);
+    discussion.save((err, discussion) => {
+        if(err) return console.error(err);
+        console.log(discussion, 'saved in db');
+    })
+});
+
+apiRoutes.get('/discussions/:id', (req, res) => {
+    const id = req.params.id;
+    Discussion.findById(id, (err, discussion) => {
+        if (err) return console.error(err);
+        res.json({
+            discussion: discussion
+        });
+        res.end();
+    });
+});
+
+apiRoutes.post('/discussions/:id', (req, res) => {
+    const id = req.params.id;
+    const newComment = req.body.comment;
+    const username = req.body.username;
+    Discussion.findById(id, (err, discussion) => {
+        if (err) return console.error(err);
+        discussion.comments.push({
+            user: username,
+            comment: newComment
+        });
+        discussion.save((err, discussion) => {
+            if(err) return console.error(err);
+            console.log(discussion, 'saved in db');
+        })
+    });
+});
+
 
 // authenticate
 // apiRoutes.post(config.routes[1], (req, res) => {
