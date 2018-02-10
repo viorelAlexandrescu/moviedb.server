@@ -8,6 +8,8 @@ const Role = require('./models/Role');
 const Review = require('./models/Review');
 const apiRoutes = express.Router(); 
 
+const users = [];
+
 // route to show a message (GET http://localhost:8080/api/)
 apiRoutes.get('/', function(req, res) {
     res.json({ message: 'API Works' });
@@ -69,22 +71,37 @@ apiRoutes.get('/users/:id', (req, res) => {
 });
 
 apiRoutes.post('/login', (req, res) => {
-    const user = new User(req.body.user);
-    console.log('login for', user);
-    User.findOne(user, 'username', (err, user) => {
-        if(err) return console.error(err);
-        if(user == {}){
+    const login = req.body.user;
+    User.findOne(login, 'username role', (err, user) => {
+        if (err) return console.error(err);
+        if (user == {}) {
             console.log(user, 'not found')
-           return res.send({
+            return res.send({
                 success: false
             });
+        } else {
+            users.forEach(element => {
+                if(element._id !== user._id){
+                    users.push(user);
+                }
+            });
+            return res.send({
+                success: true,
+                user: user
+            });
         }
-        console.log(user, 'found')
-        return res.send({
-            success: true
-        });
+        console.log(users.length);
     })
 });
+
+apiRoutes.post('/logout', (req, res) => {
+    const id = req.body.id;
+    users.forEach((element, index) => {
+        if(element._id === id)
+            users = users.splice(index, 1);
+    });
+    console.log(users.length);
+})
 
 apiRoutes.get('/roles', (req, res) => {
     Role.find((err, roles) => {
